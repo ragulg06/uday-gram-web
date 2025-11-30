@@ -1,0 +1,219 @@
+You are an expert frontend engineer.
+
+I will upload a PDF called **"User Manual of AGY.pdf"**.  
+It describes an existing government portal for the Adarsh Gram / PM-AJAY scheme.
+
+⚠ IMPORTANT RULES
+- Use the PDF ONLY to understand the workflows, data fields, and user roles.
+- DO NOT copy any of its UI design, colors, icons, or wording.
+- Build a completely NEW UI and NEW codebase that just supports the same functionality.
+
+========================================
+GOAL
+========================================
+Build a complete admin-style web frontend for a system that:
+
+- Identifies infrastructure, amenities, and service gaps in SC-majority villages.
+- Captures village-level and household-level data (Formats I, II, III-A, III-B, IV, V, VI, VII, VIII).
+- Prepares and manages Village Development Plans (VDP).
+- Tracks real-time progress of infrastructure works and beneficiary-oriented initiatives.
+- Generates district and state level reports.
+- Supports the Adarsh Gram declaration workflow.
+
+The final output should be a WORKING React frontend (no backend), with routing, pages, components, and mock API calls.
+
+========================================
+TECH STACK
+========================================
+- React (JavaScript, NOT TypeScript)
+- React Router for routing
+- Tailwind CSS for styling
+- Axios (or fetch) with a simple `api` utility that returns mock data
+- Component-based architecture with clear folder structure:
+
+  src/
+    components/
+    pages/
+    layout/
+    hooks/
+    services/
+    router/
+
+No build tooling configuration is needed if you generate a Vite or CRA starter, but please show where files should go.
+
+========================================
+GLOBAL LAYOUT
+========================================
+Create a main layout with:
+
+- LEFT SIDEBAR (collapsible):
+  Sections and submenus:
+  1. Dashboard
+  2. Village Verification
+  3. Village Formats
+     - Format I – Village Profile
+     - Format II – Infrastructure & Amenities
+     - Format III(A) – Household Survey
+     - Format III(B) – Beneficiary Initiatives
+     - Format IV – Costing & Funding
+  4. Generate Village Score
+  5. Manage VDP
+     - Generate Complete VDP
+     - Unlock / Edit VDP
+  6. Submit Progress
+     - Infrastructure Progress (Format IV – post VDP)
+     - Beneficiary Progress (Format V)
+     - Monthly District Report (Format VII)
+  7. Adarsh Gram Declaration
+  8. Agency Management
+  9. Reports
+  10. Help / Tutorials / FAQ
+  11. Contact / Feedback
+
+- TOP NAVBAR:
+  - App title (e.g., "Adarsh Gram Monitor")
+  - Logged-in user name
+  - Dropdown menu: Profile, Change Password, Logout
+
+- MAIN CONTENT:
+  - React Router outlet that renders the current page.
+
+Use Tailwind to make it clean, responsive, and government-style (simple, readable, high contrast).
+
+========================================
+AUTH & BASIC PAGES
+========================================
+
+1. Login Page
+   - Fields: username, password, captcha placeholder.
+   - On submit, simulate login and redirect to `/dashboard`.
+
+2. Profile / Change Password Pages
+   - Simple forms with validation and success toasts (mock only).
+
+========================================
+CORE FUNCTIONAL PAGES
+========================================
+
+For all forms, use controlled components, Tailwind styling, basic validation, and mock API calls.
+
+A) Dashboard (`/dashboard`)
+   - Cards showing mock stats: 
+     - villages onboarded, households surveyed, infra works in progress, completed projects, funds released/utilized.
+   - 1–2 simple charts (use any lightweight chart library or simple SVG): 
+     - progress of infrastructure vs beneficiary initiatives,
+     - number of villages close to Adarsh Gram criteria.
+   - Table of “Top delayed projects” with status tags.
+
+B) Village Verification (`/village-verification`)
+   - Table of villages with columns: State, District, Block, Panchayat, Village Name, Status, Last Updated.
+   - Dropdown per row: Verified / Not Verified.
+   - Text box for remarks & Save button (mock API).
+
+C) Format I – Village Profile
+   - Page with:
+     - Cascading selects: State → District → Block → Panchayat → Village.
+     - Sections for village demographics, SC population, basic amenities, GPS coordinates.
+     - Section to add Convergence Committee members (dynamic rows: name, designation, phone).
+   - Buttons: Save Draft, Submit.
+
+D) Format II – Infrastructure & Amenities
+   - Filter bar: location + domain (education, health, water, roads, etc.).
+   - Table listing indicators per domain with:
+     - Current status (dropdown: Available / Not Available / Inadequate).
+     - Gap description.
+     - Proposed action plan text area.
+     - Priority dropdown (High/Medium/Low).
+   - “Add new action item” button to create additional rows for that indicator.
+
+E) Format III(A) – Household Survey
+   - Household list view:
+     - Search by household ID, head name, address.
+     - Button: “Add New Household”.
+   - “Add/Edit Household” page:
+     - Basic details: head name, address, caste, number of members, income bracket, contact.
+     - Tabs or accordions for different domains (education, health, sanitation, livelihood, etc.).
+     - Within each domain: a set of sample questions (use mock ones) with radio/select inputs.
+     - Progress bar showing how many domains completed.
+
+F) Format III(B) – Beneficiary Initiatives
+   - Page to map households to schemes:
+     - Filters: village, domain, indicator.
+     - Table listing households needing intervention.
+     - For each row: dropdown to choose initiative/scheme, text box for remarks, Save button.
+   - Summary section: count of beneficiaries per scheme for the selected village.
+
+G) Format IV – Costing & Funding (Pre-VDP)
+   - Table of infrastructure works derived from gaps:
+     - columns: Work Name, Domain, Estimated Cost, Funding Source (central/state/other), Implementing Agency, Duration.
+   - Modal or inline editor to add/update funding details.
+   - Show total estimated cost at bottom.
+
+H) Generate Village Score
+   - Page to choose a village and display:
+     - Component-wise scores (education, health, water, etc.).
+     - Overall composite score.
+     - Simple bar/line chart showing improvement over time using mock history data.
+   - Button: "Recompute Score" (just triggers a dummy recalculation and toast).
+
+I) Manage VDP
+   1. Generate Complete VDP:
+      - Summary view of all gaps, projects, costs, and household initiatives for the selected village.
+      - Button: “Generate Draft VDP” that assembles them into a read-only preview.
+      - Button: “Submit VDP to District” (mock).
+   2. Unlock / Edit VDP:
+      - Table of VDPs with status (Draft / Submitted / Approved).
+      - Button to unlock for edits (only when allowed), with a confirmation modal.
+
+J) Submit Progress
+   1. Infrastructure Progress (Format IV – post VDP):
+      - List of works under a selected village.
+      - For each: progress percent slider, last update date, remarks, upload photo placeholder.
+      - Status tags: Not Started / In Progress / Completed.
+   2. Beneficiary Progress (Format V):
+      - List of households & schemes.
+      - Status dropdown: Identified / Sanctioned / In Progress / Completed.
+      - Date fields for sanction/completion.
+   3. Monthly District Report (Format VII):
+      - Form to pick Month & District.
+      - Aggregated numbers (readonly) plus narrative text areas for summary & challenges.
+      - Button: Generate & Save Report (mock).
+
+K) Adarsh Gram Declaration
+   - Checklist view for each village:
+     - Show key criteria with green/red indicators (use mock rules).
+     - Button “Mark as Recommended for Adarsh Gram” with confirmation.
+   - Table of recommended vs declared Adarsh Gram villages.
+
+L) Agency Management
+   - Simple CRUD:
+     - Add Agency form.
+     - Agency list: name, type, district, contact person, phone, email.
+
+M) Reports
+   - Filters for location and date range.
+   - Tabs for:
+     - Infrastructure report,
+     - Beneficiary saturation report,
+     - Financial report.
+   - Each tab: data table with export buttons that just trigger dummy download actions.
+
+N) Help / Tutorials / FAQ / Contact / Feedback
+   - Static pages with placeholder text and forms:
+     - FAQ accordion.
+     - Feedback form (name, contact, message).
+     - Contact info card layout.
+
+========================================
+IMPLEMENTATION NOTES
+========================================
+- Use Tailwind utility classes to style all pages; keep design simple and consistent.
+- Create reusable components:
+  - `PageHeader`, `Card`, `StatCard`, `DataTable`, `FormSection`, `FilterBar`, etc.
+- Place all dummy data and mock API calls in `src/services/api.js`.
+- For now, state management can be local state and simple React Context; use minimal external dependencies.
+- Ensure the routing is fully wired so I can navigate the whole app and see all placeholder pages working.
+
+Generate the full React project structure and provide the key code files (App.js, router, layout components, example pages, and Tailwind setup).
+Explain briefly how to run the project (npm commands).
+**PROMPT END**
