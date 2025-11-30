@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: uday-gram-web
+    env: node
+    plan: free
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
