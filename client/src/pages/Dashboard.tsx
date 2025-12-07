@@ -8,10 +8,11 @@ import {
   Wrench, 
   CheckCircle2, 
   TrendingUp,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react";
 import {
-  dashboardStats,
+  dashboardStats as mockDashboardStats,
   adarshGramDeclarationData,
   schemeWiseFundAllocation,
   completionOfInfraWorks,
@@ -34,6 +35,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import { useQuery } from "@tanstack/react-query";
 
 function StatCard({ 
   title, 
@@ -90,6 +92,19 @@ function ChartCard({ title, children, className = "" }: { title: string; childre
 }
 
 export default function Dashboard() {
+  const { data: apiStats, isLoading } = useQuery<{
+    villagesCovered: number;
+    householdsSurveyed: number;
+    infraWorksInProgress: number;
+    infraWorksCompleted: number;
+    beneficiariesIdentified: number;
+    beneficiariesSaturated: number;
+  }>({
+    queryKey: ['/api/dashboard/stats'],
+  });
+
+  const dashboardStats = apiStats || mockDashboardStats;
+
   const formatCurrency = (value: number) => {
     if (value >= 10000000) {
       return `${(value / 10000000).toFixed(2)} Cr`;
@@ -98,6 +113,16 @@ export default function Dashboard() {
     }
     return value.toLocaleString();
   };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>

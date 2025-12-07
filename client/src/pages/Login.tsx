@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [captcha, setCaptcha] = useState(generateCaptcha());
   const [formData, setFormData] = useState({
@@ -57,14 +59,23 @@ export default function Login() {
 
     setIsLoading(true);
     
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await login(formData.loginId, formData.password);
       toast({
         title: "Success",
         description: "Login successful! Redirecting...",
       });
       setLocation("/dashboard");
-    }, 1000);
+    } catch (error) {
+      toast({
+        title: "Login Failed",
+        description: error instanceof Error ? error.message : "Invalid credentials",
+        variant: "destructive",
+      });
+      handleRefreshCaptcha();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

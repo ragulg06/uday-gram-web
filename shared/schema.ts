@@ -291,6 +291,28 @@ export const insertAdarshGramDeclarationSchema = createInsertSchema(adarshGramDe
 export type InsertAdarshGramDeclaration = z.infer<typeof insertAdarshGramDeclarationSchema>;
 export type AdarshGramDeclaration = typeof adarshGramDeclarations.$inferSelect;
 
+// File Uploads
+export const uploads = pgTable("uploads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  filename: text("filename").notNull(),
+  originalName: text("original_name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  size: integer("size").notNull(),
+  uploadType: text("upload_type").notNull(),
+  entityId: varchar("entity_id"),
+  entityType: text("entity_type"),
+  uploadedBy: varchar("uploaded_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUploadSchema = createInsertSchema(uploads).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertUpload = z.infer<typeof insertUploadSchema>;
+export type Upload = typeof uploads.$inferSelect;
+
 // Monthly Reports
 export const monthlyReports = pgTable("monthly_reports", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
