@@ -5,9 +5,16 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL must be set");
+const supabaseProjectRef = process.env.SUPABASE_PROJECT_REF || "actlmcvilznnzxawiyxs";
+const supabasePassword = process.env.SUPABASE_DB_PASSWORD;
+const supabaseRegion = process.env.SUPABASE_REGION || "ap-south-1";
+
+if (!supabasePassword) {
+  throw new Error("SUPABASE_DB_PASSWORD must be set");
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const encodedPassword = encodeURIComponent(supabasePassword);
+const connectionString = `postgresql://postgres.${supabaseProjectRef}:${encodedPassword}@aws-0-${supabaseRegion}.pooler.supabase.com:6543/postgres`;
+
+export const pool = new Pool({ connectionString });
 export const db = drizzle(pool, { schema });
