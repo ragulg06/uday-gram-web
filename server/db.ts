@@ -1,17 +1,16 @@
+import { config } from 'dotenv';
+config(); // Load environment variables
+
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "@shared/schema";
 
-const supabaseProjectRef = process.env.SUPABASE_PROJECT_REF || "actlmcvilznnzxawiyxs";
-const supabasePassword = process.env.SUPABASE_DB_PASSWORD;
-const supabaseRegion = process.env.SUPABASE_REGION || "ap-south-1";
+// Use DATABASE_URL from environment (configured for Supabase)
+const connectionString = process.env.DATABASE_URL;
 
-if (!supabasePassword) {
-  throw new Error("SUPABASE_DB_PASSWORD must be set");
+if (!connectionString) {
+  throw new Error("DATABASE_URL must be set in environment variables");
 }
-
-const encodedPassword = encodeURIComponent(supabasePassword);
-const connectionString = `postgresql://postgres.${supabaseProjectRef}:${encodedPassword}@aws-0-${supabaseRegion}.pooler.supabase.com:6543/postgres`;
 
 const client = postgres(connectionString, { prepare: false });
 export const db = drizzle(client, { schema });

@@ -275,6 +275,16 @@ export default function Login() {
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
+
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full border-orange-500 text-orange-600 hover:bg-orange-50"
+                onClick={() => setLocation("/dashboard")}
+                data-testid="button-bypass-login"
+              >
+                🚀 Bypass Login (Go to Dashboard)
+              </Button>
             </form>
           </CardContent>
         </Card>

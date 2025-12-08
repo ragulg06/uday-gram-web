@@ -22,6 +22,7 @@ import {
 import { Plus, Trash2 } from "lucide-react";
 import { states, districts, blocks, gramPanchayats, mockVillages } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
+import { getAuthHeaders } from "@/lib/auth";
 
 interface CommitteeMember {
   id: string;
@@ -88,7 +89,7 @@ export default function FormatIAdd() {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.state || !formData.district || !formData.gramPanchayat || !formData.village) {
@@ -100,10 +101,96 @@ export default function FormatIAdd() {
       return;
     }
 
-    toast({
-      title: "Success",
-      description: "Format I data submitted successfully",
-    });
+    try {
+      // Create village data
+      const villageData = {
+        state: formData.state,
+        district: formData.district,
+        block: formData.block,
+        gramPanchayat: formData.gramPanchayat,
+        villageName: formData.village,
+        villageCode: `${formData.state}-${formData.district}-${formData.village}`.replace(/\s+/g, '-').toUpperCase(),
+        selectionYear: new Date().getFullYear().toString(),
+        verificationStatus: "pending",
+        totalPopulation: parseInt(formData.currentScPopulation) || 0,
+        scPopulation: parseInt(formData.currentScPopulation) || 0,
+        totalHouseholds: parseInt(formData.householdsAsOnDate) || 0,
+        latitude: formData.latitude || null,
+        longitude: formData.longitude || null,
+      };
+
+      // Send village data to backend
+      const villageResponse = await fetch("/api/villages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(villageData),
+      });
+
+      if (!villageResponse.ok) {
+        throw new Error("Failed to create village");
+      }
+
+      const village = await villageResponse.json();
+
+      // Create committee members
+      for (const member of committeeMembers) {
+        const memberData = {
+          villageId: village.id,
+          name: member.name,
+          designation: member.designation,
+          mobileNo: member.mobileNo,
+          email: member.email,
+          address: member.address,
+          remarks: member.remarks,
+        };
+
+        const memberResponse = await fetch(`/api/villages/${village.id}/committee-members`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify(memberData),
+        });
+
+        if (!memberResponse.ok) {
+          console.warn("Failed to create committee member:", member.name);
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: "Format I data submitted successfully",
+      });
+
+      // Reset form
+      setFormData({
+        state: "",
+        district: "",
+        block: "",
+        gramPanchayat: "",
+        village: "",
+        scPopulation2011: "",
+        householdsAsOnDate: "",
+        currentScPopulation: "",
+        surveyFromDate: "",
+        surveyToDate: "",
+        latitude: "",
+        longitude: "",
+      });
+      setCommitteeMembers([]);
+
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit data",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
