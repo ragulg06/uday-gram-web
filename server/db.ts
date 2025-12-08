@@ -1,9 +1,6 @@
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import ws from "ws";
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "@shared/schema";
-
-neonConfig.webSocketConstructor = ws;
 
 const supabaseProjectRef = process.env.SUPABASE_PROJECT_REF || "actlmcvilznnzxawiyxs";
 const supabasePassword = process.env.SUPABASE_DB_PASSWORD;
@@ -16,5 +13,5 @@ if (!supabasePassword) {
 const encodedPassword = encodeURIComponent(supabasePassword);
 const connectionString = `postgresql://postgres.${supabaseProjectRef}:${encodedPassword}@aws-0-${supabaseRegion}.pooler.supabase.com:6543/postgres`;
 
-export const pool = new Pool({ connectionString });
-export const db = drizzle(pool, { schema });
+const client = postgres(connectionString, { prepare: false });
+export const db = drizzle(client, { schema });

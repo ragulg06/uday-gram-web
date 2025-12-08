@@ -12,7 +12,7 @@ if (!supabasePassword) {
 const encodedPassword = encodeURIComponent(supabasePassword);
 const connectionString = `postgresql://postgres.${supabaseProjectRef}:${encodedPassword}@aws-0-${supabaseRegion}.pooler.supabase.com:5432/postgres`;
 
-console.log("Pushing schema to Supabase database via connection pooler...");
+console.log("Pushing schema to Supabase database via session pooler (port 5432)...");
 
 try {
   execSync('npx drizzle-kit push', { 
