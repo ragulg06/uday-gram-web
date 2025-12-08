@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 
 const supabaseProjectRef = process.env.SUPABASE_PROJECT_REF || "actlmcvilznnzxawiyxs";
 const supabasePassword = process.env.SUPABASE_DB_PASSWORD;
+const supabaseRegion = process.env.SUPABASE_REGION || "ap-south-1";
 
 if (!supabasePassword) {
   console.error("SUPABASE_DB_PASSWORD must be set");
@@ -9,9 +10,9 @@ if (!supabasePassword) {
 }
 
 const encodedPassword = encodeURIComponent(supabasePassword);
-const connectionString = `postgresql://postgres:${encodedPassword}@db.${supabaseProjectRef}.supabase.co:5432/postgres`;
+const connectionString = `postgresql://postgres.${supabaseProjectRef}:${encodedPassword}@aws-0-${supabaseRegion}.pooler.supabase.com:5432/postgres`;
 
-console.log("Pushing schema to Supabase database...");
+console.log("Pushing schema to Supabase database via connection pooler...");
 
 try {
   execSync('npx drizzle-kit push', { 
