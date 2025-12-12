@@ -130,7 +130,14 @@ export default function FormatIAdd() {
       });
 
       if (!villageResponse.ok) {
-        throw new Error("Failed to create village");
+        const errorData = await villageResponse.json().catch(() => ({}));
+        console.error('Village creation failed:', {
+          status: villageResponse.status,
+          statusText: villageResponse.statusText,
+          error: errorData,
+          requestData: villageData
+        });
+        throw new Error(errorData.error || 'Failed to create village. Please check the form data and try again.');
       }
 
       const village = await villageResponse.json();
@@ -185,9 +192,21 @@ export default function FormatIAdd() {
 
     } catch (error) {
       console.error("Submit error:", error);
+      let errorMessage = "Failed to submit data";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        // Add more specific error messages based on common issues
+        if (error.message.includes('duplicate key')) {
+          errorMessage = "A village with this code already exists. Please check the village details.";
+        } else if (error.message.includes('required field')) {
+          errorMessage = "Please fill in all required fields.";
+        }
+      }
+      
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit data",
+        description: errorMessage,
         variant: "destructive",
       });
     }

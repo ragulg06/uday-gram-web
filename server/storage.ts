@@ -1,383 +1,255 @@
-import { eq, and, desc, sql, count, sum } from "drizzle-orm";
-import { db } from "./db";
-import {
-  type User, type InsertUser, users,
-  type Village, type InsertVillage, villages,
-  type CommitteeMember, type InsertCommitteeMember, committeMembers,
-  type InfrastructureIndicator, type InsertInfrastructureIndicator, infrastructureIndicators,
-  type Household, type InsertHousehold, households,
-  type HouseholdSurvey, type InsertHouseholdSurvey, householdSurveys,
-  type BeneficiaryInitiative, type InsertBeneficiaryInitiative, beneficiaryInitiatives,
-  type InfrastructureWork, type InsertInfrastructureWork, infrastructureWorks,
-  type Agency, type InsertAgency, agencies,
-  type Vdp, type InsertVdp, vdps,
-  type VillageScore, type InsertVillageScore, villageScores,
-  type AdarshGramDeclaration, type InsertAdarshGramDeclaration, adarshGramDeclarations,
-  type MonthlyReport, type InsertMonthlyReport, monthlyReports,
-  type Upload, type InsertUpload, uploads,
-  type DashboardStats,
-} from "@shared/schema";
+// Simple in-memory storage for demo purposes
+// This replaces the database functionality with temporary storage
 
-export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  updateUserLastLogin(id: string): Promise<void>;
-
-  listVillages(filters?: { state?: string; district?: string; block?: string }): Promise<Village[]>;
-  getVillage(id: string): Promise<Village | undefined>;
-  getVillageByCode(code: string): Promise<Village | undefined>;
-  createVillage(village: InsertVillage): Promise<Village>;
-  updateVillage(id: string, village: Partial<InsertVillage>): Promise<Village | undefined>;
-
-  listCommitteeMembers(villageId: string): Promise<CommitteeMember[]>;
-  createCommitteeMember(member: InsertCommitteeMember): Promise<CommitteeMember>;
-  deleteCommitteeMember(id: string): Promise<void>;
-
-  listInfrastructureIndicators(villageId: string): Promise<InfrastructureIndicator[]>;
-  createInfrastructureIndicator(indicator: InsertInfrastructureIndicator): Promise<InfrastructureIndicator>;
-  updateInfrastructureIndicator(id: string, indicator: Partial<InsertInfrastructureIndicator>): Promise<InfrastructureIndicator | undefined>;
-
-  listHouseholds(villageId: string): Promise<Household[]>;
-  getHousehold(id: string): Promise<Household | undefined>;
-  createHousehold(household: InsertHousehold): Promise<Household>;
-  updateHousehold(id: string, household: Partial<InsertHousehold>): Promise<Household | undefined>;
-
-  listHouseholdSurveys(householdId: string): Promise<HouseholdSurvey[]>;
-  createHouseholdSurvey(survey: InsertHouseholdSurvey): Promise<HouseholdSurvey>;
-
-  listBeneficiaryInitiatives(villageId: string): Promise<BeneficiaryInitiative[]>;
-  createBeneficiaryInitiative(initiative: InsertBeneficiaryInitiative): Promise<BeneficiaryInitiative>;
-  updateBeneficiaryInitiative(id: string, initiative: Partial<InsertBeneficiaryInitiative>): Promise<BeneficiaryInitiative | undefined>;
-
-  listInfrastructureWorks(villageId: string): Promise<InfrastructureWork[]>;
-  getInfrastructureWork(id: string): Promise<InfrastructureWork | undefined>;
-  createInfrastructureWork(work: InsertInfrastructureWork): Promise<InfrastructureWork>;
-  updateInfrastructureWork(id: string, work: Partial<InsertInfrastructureWork>): Promise<InfrastructureWork | undefined>;
-
-  listAgencies(): Promise<Agency[]>;
-  createAgency(agency: InsertAgency): Promise<Agency>;
-
-  getVdp(villageId: string): Promise<Vdp | undefined>;
-  getVdpById(id: string): Promise<Vdp | undefined>;
-  createVdp(vdp: InsertVdp): Promise<Vdp>;
-  updateVdp(id: string, vdp: Partial<InsertVdp>): Promise<Vdp | undefined>;
-
-  listVillageScores(villageId: string): Promise<VillageScore[]>;
-  upsertVillageScore(score: InsertVillageScore): Promise<VillageScore>;
-
-  getAdarshGramDeclaration(villageId: string): Promise<AdarshGramDeclaration | undefined>;
-  createAdarshGramDeclaration(declaration: InsertAdarshGramDeclaration): Promise<AdarshGramDeclaration>;
-  updateAdarshGramDeclaration(id: string, declaration: Partial<InsertAdarshGramDeclaration>): Promise<AdarshGramDeclaration | undefined>;
-
-  listMonthlyReports(filters?: { district?: string; month?: string; year?: number }): Promise<MonthlyReport[]>;
-  createMonthlyReport(report: InsertMonthlyReport): Promise<MonthlyReport>;
-
-  listUploads(entityId?: string, entityType?: string): Promise<Upload[]>;
-  getUpload(id: string): Promise<Upload | undefined>;
-  createUpload(upload: InsertUpload): Promise<Upload>;
-  deleteUpload(id: string): Promise<void>;
-
-  getDashboardStats(filters?: { state?: string; district?: string }): Promise<DashboardStats>;
+export interface User {
+  id: string;
+  username: string;
+  password: string;
+  name: string;
+  designation: string;
+  role: string;
+  mobile?: string;
+  email?: string;
+  state?: string;
+  district?: string;
+  lastLogin?: Date;
 }
 
-export class PostgresStorage implements IStorage {
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
+export interface Village {
+  id: string;
+  state: string;
+  district: string;
+  block: string;
+  gramPanchayat: string;
+  villageName: string;
+  villageCode: string;
+  selectionYear: string;
+  verificationStatus: string;
+  totalPopulation?: number;
+  scPopulation?: number;
+  scPercentage?: number;
+  totalHouseholds?: number;
+  latitude?: string;
+  longitude?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
+export interface Vdp {
+  id: string;
+  villageId: string;
+  status: string;
+  householdsCompleted: boolean;
+  beneficiariesLinked: boolean;
+  actionPlansSubmitted: boolean;
+  villageScoreVerified: boolean;
+  estimateSubmitted: boolean;
+  totalEstimatedCost: number;
+  submittedAt?: Date;
+  approvedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DashboardStats {
+  villagesCovered: number;
+  householdsSurveyed: number;
+  infraWorksInProgress: number;
+  infraWorksCompleted: number;
+  fundsReleased: number;
+  fundsUtilized: number;
+  adarshGramsRecommended: number;
+  adarshGramsDeclared: number;
+  beneficiariesIdentified: number;
+  beneficiariesSaturated: number;
+}
+
+// In-memory storage
+const users: User[] = [
+  {
+    id: "1",
+    username: "admin",
+    password: "$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjQ",
+    name: "Admin User",
+    designation: "Administrator",
+    role: "admin",
+    state: "Delhi",
+    district: "West Delhi"
+  }
+];
+
+const villages: Village[] = [
+  {
+    id: "1",
+    state: "Delhi",
+    district: "West Delhi",
+    block: "Delhi West",
+    gramPanchayat: "Delhi West",
+    villageName: "Buland Pur",
+    villageCode: "4186",
+    selectionYear: "2018-2019",
+    verificationStatus: "verified",
+    totalPopulation: 5000,
+    scPopulation: 1500,
+    scPercentage: 30,
+    totalHouseholds: 1000,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "2", 
+    state: "Delhi",
+    district: "West Delhi",
+    block: "Delhi West",
+    gramPanchayat: "Blandpur",
+    villageName: "Rewla Khanm Pur",
+    villageCode: "64014",
+    selectionYear: "2022-2023",
+    verificationStatus: "pending",
+    totalPopulation: 3000,
+    scPopulation: 900,
+    scPercentage: 30,
+    totalHouseholds: 600,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+const vdps: Vdp[] = [];
+
+export const storage = {
+  // User operations
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-
-  async updateUserLastLogin(id: string): Promise<void> {
-    await db.update(users).set({ lastLogin: new Date() }).where(eq(users.id, id));
-  }
-
-  async listVillages(filters?: { state?: string; district?: string; block?: string }): Promise<Village[]> {
-    let query = db.select().from(villages);
-    const conditions = [];
-    if (filters?.state) conditions.push(eq(villages.state, filters.state));
-    if (filters?.district) conditions.push(eq(villages.district, filters.district));
-    if (filters?.block) conditions.push(eq(villages.block, filters.block));
-    if (conditions.length > 0) {
-      return await db.select().from(villages).where(and(...conditions)).orderBy(desc(villages.createdAt));
-    }
-    return await db.select().from(villages).orderBy(desc(villages.createdAt));
-  }
-
-  async getVillage(id: string): Promise<Village | undefined> {
-    const [village] = await db.select().from(villages).where(eq(villages.id, id));
-    return village;
-  }
-
-  async getVillageByCode(code: string): Promise<Village | undefined> {
-    const [village] = await db.select().from(villages).where(eq(villages.villageCode, code));
-    return village;
-  }
-
-  async createVillage(village: InsertVillage): Promise<Village> {
-    const [created] = await db.insert(villages).values(village).returning();
-    return created;
-  }
-
-  async updateVillage(id: string, village: Partial<InsertVillage>): Promise<Village | undefined> {
-    const [updated] = await db.update(villages).set({ ...village, updatedAt: new Date() }).where(eq(villages.id, id)).returning();
-    return updated;
-  }
-
-  async listCommitteeMembers(villageId: string): Promise<CommitteeMember[]> {
-    return await db.select().from(committeMembers).where(eq(committeMembers.villageId, villageId));
-  }
-
-  async createCommitteeMember(member: InsertCommitteeMember): Promise<CommitteeMember> {
-    const [created] = await db.insert(committeMembers).values(member).returning();
-    return created;
-  }
-
-  async deleteCommitteeMember(id: string): Promise<void> {
-    await db.delete(committeMembers).where(eq(committeMembers.id, id));
-  }
-
-  async listInfrastructureIndicators(villageId: string): Promise<InfrastructureIndicator[]> {
-    return await db.select().from(infrastructureIndicators).where(eq(infrastructureIndicators.villageId, villageId));
-  }
-
-  async createInfrastructureIndicator(indicator: InsertInfrastructureIndicator): Promise<InfrastructureIndicator> {
-    const [created] = await db.insert(infrastructureIndicators).values(indicator).returning();
-    return created;
-  }
-
-  async updateInfrastructureIndicator(id: string, indicator: Partial<InsertInfrastructureIndicator>): Promise<InfrastructureIndicator | undefined> {
-    const [updated] = await db.update(infrastructureIndicators).set({ ...indicator, updatedAt: new Date() }).where(eq(infrastructureIndicators.id, id)).returning();
-    return updated;
-  }
-
-  async listHouseholds(villageId: string): Promise<Household[]> {
-    return await db.select().from(households).where(eq(households.villageId, villageId));
-  }
-
-  async getHousehold(id: string): Promise<Household | undefined> {
-    const [household] = await db.select().from(households).where(eq(households.id, id));
-    return household;
-  }
-
-  async createHousehold(household: InsertHousehold): Promise<Household> {
-    const [created] = await db.insert(households).values(household).returning();
-    return created;
-  }
-
-  async updateHousehold(id: string, household: Partial<InsertHousehold>): Promise<Household | undefined> {
-    const [updated] = await db.update(households).set({ ...household, updatedAt: new Date() }).where(eq(households.id, id)).returning();
-    return updated;
-  }
-
-  async listHouseholdSurveys(householdId: string): Promise<HouseholdSurvey[]> {
-    return await db.select().from(householdSurveys).where(eq(householdSurveys.householdId, householdId));
-  }
-
-  async createHouseholdSurvey(survey: InsertHouseholdSurvey): Promise<HouseholdSurvey> {
-    const [created] = await db.insert(householdSurveys).values(survey).returning();
-    return created;
-  }
-
-  async listBeneficiaryInitiatives(villageId: string): Promise<BeneficiaryInitiative[]> {
-    return await db.select().from(beneficiaryInitiatives).where(eq(beneficiaryInitiatives.villageId, villageId));
-  }
-
-  async createBeneficiaryInitiative(initiative: InsertBeneficiaryInitiative): Promise<BeneficiaryInitiative> {
-    const [created] = await db.insert(beneficiaryInitiatives).values(initiative).returning();
-    return created;
-  }
-
-  async updateBeneficiaryInitiative(id: string, initiative: Partial<InsertBeneficiaryInitiative>): Promise<BeneficiaryInitiative | undefined> {
-    const [updated] = await db.update(beneficiaryInitiatives).set(initiative).where(eq(beneficiaryInitiatives.id, id)).returning();
-    return updated;
-  }
-
-  async listInfrastructureWorks(villageId: string): Promise<InfrastructureWork[]> {
-    return await db.select().from(infrastructureWorks).where(eq(infrastructureWorks.villageId, villageId));
-  }
-
-  async getInfrastructureWork(id: string): Promise<InfrastructureWork | undefined> {
-    const [work] = await db.select().from(infrastructureWorks).where(eq(infrastructureWorks.id, id));
-    return work;
-  }
-
-  async createInfrastructureWork(work: InsertInfrastructureWork): Promise<InfrastructureWork> {
-    const [created] = await db.insert(infrastructureWorks).values(work).returning();
-    return created;
-  }
-
-  async updateInfrastructureWork(id: string, work: Partial<InsertInfrastructureWork>): Promise<InfrastructureWork | undefined> {
-    const [updated] = await db.update(infrastructureWorks).set({ ...work, lastUpdated: new Date() }).where(eq(infrastructureWorks.id, id)).returning();
-    return updated;
-  }
-
-  async listAgencies(): Promise<Agency[]> {
-    return await db.select().from(agencies);
-  }
-
-  async createAgency(agency: InsertAgency): Promise<Agency> {
-    const [created] = await db.insert(agencies).values(agency).returning();
-    return created;
-  }
-
-  async getVdp(villageId: string): Promise<Vdp | undefined> {
-    const [vdp] = await db.select().from(vdps).where(eq(vdps.villageId, villageId));
-    return vdp;
-  }
-
-  async getVdpById(id: string): Promise<Vdp | undefined> {
-    const [vdp] = await db.select().from(vdps).where(eq(vdps.id, id));
-    return vdp;
-  }
-
-  async createVdp(vdp: InsertVdp): Promise<Vdp> {
-    const [created] = await db.insert(vdps).values(vdp).returning();
-    return created;
-  }
-
-  async updateVdp(id: string, vdp: Partial<InsertVdp>): Promise<Vdp | undefined> {
-    const [updated] = await db.update(vdps).set({ ...vdp, updatedAt: new Date() }).where(eq(vdps.id, id)).returning();
-    return updated;
-  }
-
-  async listVillageScores(villageId: string): Promise<VillageScore[]> {
-    return await db.select().from(villageScores).where(eq(villageScores.villageId, villageId));
-  }
-
-  async upsertVillageScore(score: InsertVillageScore): Promise<VillageScore> {
-    const existing = await db.select().from(villageScores)
-      .where(and(eq(villageScores.villageId, score.villageId), eq(villageScores.domain, score.domain)));
-    
-    if (existing.length > 0) {
-      const [updated] = await db.update(villageScores)
-        .set({ score: score.score, maxScore: score.maxScore, computedAt: new Date() })
-        .where(eq(villageScores.id, existing[0].id))
-        .returning();
-      return updated;
-    }
-    
-    const [created] = await db.insert(villageScores).values(score).returning();
-    return created;
-  }
-
-  async getAdarshGramDeclaration(villageId: string): Promise<AdarshGramDeclaration | undefined> {
-    const [declaration] = await db.select().from(adarshGramDeclarations).where(eq(adarshGramDeclarations.villageId, villageId));
-    return declaration;
-  }
-
-  async createAdarshGramDeclaration(declaration: InsertAdarshGramDeclaration): Promise<AdarshGramDeclaration> {
-    const [created] = await db.insert(adarshGramDeclarations).values(declaration).returning();
-    return created;
-  }
-
-  async updateAdarshGramDeclaration(id: string, declaration: Partial<InsertAdarshGramDeclaration>): Promise<AdarshGramDeclaration | undefined> {
-    const [updated] = await db.update(adarshGramDeclarations).set(declaration).where(eq(adarshGramDeclarations.id, id)).returning();
-    return updated;
-  }
-
-  async listMonthlyReports(filters?: { district?: string; month?: string; year?: number }): Promise<MonthlyReport[]> {
-    const conditions = [];
-    if (filters?.district) conditions.push(eq(monthlyReports.district, filters.district));
-    if (filters?.month) conditions.push(eq(monthlyReports.month, filters.month));
-    if (filters?.year) conditions.push(eq(monthlyReports.year, filters.year));
-    if (conditions.length > 0) {
-      return await db.select().from(monthlyReports).where(and(...conditions)).orderBy(desc(monthlyReports.createdAt));
-    }
-    return await db.select().from(monthlyReports).orderBy(desc(monthlyReports.createdAt));
-  }
-
-  async createMonthlyReport(report: InsertMonthlyReport): Promise<MonthlyReport> {
-    const [created] = await db.insert(monthlyReports).values(report).returning();
-    return created;
-  }
-
-  async listUploads(entityId?: string, entityType?: string): Promise<Upload[]> {
-    const conditions = [];
-    if (entityId) conditions.push(eq(uploads.entityId, entityId));
-    if (entityType) conditions.push(eq(uploads.entityType, entityType));
-    if (conditions.length > 0) {
-      return await db.select().from(uploads).where(and(...conditions)).orderBy(desc(uploads.createdAt));
-    }
-    return await db.select().from(uploads).orderBy(desc(uploads.createdAt));
-  }
-
-  async getUpload(id: string): Promise<Upload | undefined> {
-    const [upload] = await db.select().from(uploads).where(eq(uploads.id, id));
-    return upload;
-  }
-
-  async createUpload(upload: InsertUpload): Promise<Upload> {
-    const [created] = await db.insert(uploads).values(upload).returning();
-    return created;
-  }
-
-  async deleteUpload(id: string): Promise<void> {
-    await db.delete(uploads).where(eq(uploads.id, id));
-  }
-
-  async getDashboardStats(filters?: { state?: string; district?: string }): Promise<DashboardStats> {
-    const villageConditions = [];
-    if (filters?.state) villageConditions.push(eq(villages.state, filters.state));
-    if (filters?.district) villageConditions.push(eq(villages.district, filters.district));
-
-    const villagesList = villageConditions.length > 0
-      ? await db.select().from(villages).where(and(...villageConditions))
-      : await db.select().from(villages);
-
-    const villageIds = villagesList.map(v => v.id);
-    
-    let householdsSurveyed = 0;
-    let infraWorksInProgress = 0;
-    let infraWorksCompleted = 0;
-    let fundsReleased = 0;
-    let fundsUtilized = 0;
-    let beneficiariesIdentified = 0;
-    let beneficiariesSaturated = 0;
-
-    if (villageIds.length > 0) {
-      for (const vid of villageIds) {
-        const hh = await db.select().from(households).where(eq(households.villageId, vid));
-        householdsSurveyed += hh.filter(h => h.surveyStatus === 'completed').length;
-
-        const works = await db.select().from(infrastructureWorks).where(eq(infrastructureWorks.villageId, vid));
-        infraWorksInProgress += works.filter(w => w.status === 'in_progress').length;
-        infraWorksCompleted += works.filter(w => w.status === 'completed').length;
-        fundsReleased += works.reduce((sum, w) => sum + (w.totalFunds || 0), 0);
-        fundsUtilized += works.filter(w => w.status === 'completed').reduce((sum, w) => sum + (w.totalFunds || 0), 0);
-
-        const benefits = await db.select().from(beneficiaryInitiatives).where(eq(beneficiaryInitiatives.villageId, vid));
-        beneficiariesIdentified += benefits.length;
-        beneficiariesSaturated += benefits.filter(b => b.status === 'completed' || b.status === 'saturated').length;
-      }
-    }
-
-    const declarations = await db.select().from(adarshGramDeclarations);
-    const adarshGramsRecommended = declarations.filter(d => d.status === 'recommended' || d.status === 'declared').length;
-    const adarshGramsDeclared = declarations.filter(d => d.status === 'declared').length;
-
-    return {
-      villagesCovered: villagesList.length,
-      householdsSurveyed,
-      infraWorksInProgress,
-      infraWorksCompleted,
-      fundsReleased,
-      fundsUtilized,
-      adarshGramsRecommended,
-      adarshGramsDeclared,
-      beneficiariesIdentified,
-      beneficiariesSaturated,
+    return users.find(u => u.username === username);
+  },
+  
+  async createUser(userData: Omit<User, 'id' | 'lastLogin'>): Promise<User> {
+    const user: User = {
+      ...userData,
+      id: Date.now().toString(),
     };
-  }
-}
+    users.push(user);
+    return user;
+  },
+  
+  async getUser(id: string): Promise<User | undefined> {
+    return users.find(u => u.id === id);
+  },
+  
+  async updateUserLastLogin(id: string): Promise<void> {
+    const user = users.find(u => u.id === id);
+    if (user) {
+      user.lastLogin = new Date();
+    }
+  },
 
-export const storage = new PostgresStorage();
+  // Village operations
+  async listVillages(filters?: { state?: string; district?: string }): Promise<Village[]> {
+    if (!filters) return villages;
+    
+    return villages.filter(v => {
+      if (filters.state && v.state !== filters.state) return false;
+      if (filters.district && v.district !== filters.district) return false;
+      return true;
+    });
+  },
+  
+  async getVillage(id: string): Promise<Village | undefined> {
+    return villages.find(v => v.id === id);
+  },
+  
+  async getVillageByCode(code: string): Promise<Village | undefined> {
+    return villages.find(v => v.villageCode === code);
+  },
+  
+  async createVillage(villageData: Omit<Village, 'id' | 'createdAt' | 'updatedAt'>): Promise<Village> {
+    const village: Village = {
+      ...villageData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    villages.push(village);
+    return village;
+  },
+  
+  async updateVillage(id: string, updates: Partial<Village>): Promise<Village | undefined> {
+    const village = villages.find(v => v.id === id);
+    if (village) {
+      Object.assign(village, updates, { updatedAt: new Date() });
+      return village;
+    }
+    return undefined;
+  },
+
+  // VDP operations
+  async getVdp(villageId: string): Promise<Vdp | undefined> {
+    return vdps.find(v => v.villageId === villageId);
+  },
+  
+  async getVdpById(id: string): Promise<Vdp | undefined> {
+    return vdps.find(v => v.id === id);
+  },
+  
+  async createVdp(vdpData: Omit<Vdp, 'id' | 'createdAt' | 'updatedAt'>): Promise<Vdp> {
+    const vdp: Vdp = {
+      ...vdpData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    vdps.push(vdp);
+    return vdp;
+  },
+  
+  async updateVdp(id: string, updates: Partial<Vdp>): Promise<Vdp | undefined> {
+    const vdp = vdps.find(v => v.id === id);
+    if (vdp) {
+      Object.assign(vdp, updates, { updatedAt: new Date() });
+      return vdp;
+    }
+    return undefined;
+  },
+
+  // Placeholder methods for other operations
+  async listCommitteeMembers(villageId: string): Promise<any[]> { return []; },
+  async createCommitteeMember(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async listInfrastructureIndicators(villageId: string): Promise<any[]> { return []; },
+  async createInfrastructureIndicator(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async listHouseholds(villageId: string): Promise<any[]> { return []; },
+  async createHousehold(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async getHousehold(id: string): Promise<any> { return undefined; },
+  async listHouseholdSurveys(villageId: string): Promise<any[]> { return []; },
+  async createHouseholdSurvey(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async listBeneficiaryInitiatives(villageId: string): Promise<any[]> { return []; },
+  async createBeneficiaryInitiative(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async listInfrastructureWorks(villageId: string): Promise<any[]> { return []; },
+  async createInfrastructureWork(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async getInfrastructureWork(id: string): Promise<any> { return undefined; },
+  async updateInfrastructureWork(id: string, updates: any): Promise<any> { return undefined; },
+  async listAgencies(): Promise<any[]> { return []; },
+  async createAgency(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async listVillageScores(villageId: string): Promise<any[]> { return []; },
+  async upsertVillageScore(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async getAdarshGramDeclaration(villageId: string): Promise<any> { return undefined; },
+  async createAdarshGramDeclaration(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async listMonthlyReports(filters?: any): Promise<any[]> { return []; },
+  async createMonthlyReport(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async getDashboardStats(filters?: any): Promise<DashboardStats> {
+    return {
+      villagesCovered: villages.length,
+      householdsSurveyed: 0,
+      infraWorksInProgress: 0,
+      infraWorksCompleted: 0,
+      fundsReleased: 0,
+      fundsUtilized: 0,
+      adarshGramsRecommended: 0,
+      adarshGramsDeclared: 0,
+      beneficiariesIdentified: 0,
+      beneficiariesSaturated: 0,
+    };
+  },
+  async createUpload(data: any): Promise<any> { return { id: Date.now().toString(), ...data }; },
+  async listUploads(filters?: any): Promise<any[]> { return []; },
+  async getUpload(id: string): Promise<any> { return undefined; },
+};
